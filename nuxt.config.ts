@@ -10,11 +10,16 @@ export default defineNuxtConfig({
     '@nuxt/icon',
     '@nuxt/image',
     '@nuxtjs/tailwindcss'
-    '@nuxt/studio'
   ],
   content: {
-    documentDriven: false,
-    studio: true  // Enable Nuxt Studio integration
+    experimental: {
+      nativeSqlite: true
+    }
+  },
+  runtimeConfig: {
+    public: {
+      contentPreviewApi: process.env.NUXT_CONTENT_PREVIEW_API
+    }
   },
   css: ['~/assets/css/main.css']
 })
