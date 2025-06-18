@@ -12,7 +12,8 @@ export default defineNuxtConfig({
     '@nuxtjs/tailwindcss'
   ],
   content: {
-    documentDriven: false
+    documentDriven: false,
+    studio: true  // Enable Nuxt Studio integration
   },
   css: ['~/assets/css/main.css']
 })
