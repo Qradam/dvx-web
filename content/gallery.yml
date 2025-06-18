@@ -1,0 +1,13 @@
+title: "My Photo Gallery"
+description: "A collection of my favorite photos"
+images:
+  - src: "/images/dummy.webp"
+    title: "dummy"
+    alt: "Photo: dummy.webp"
+    description: "Auto-added photo"
+    tags: ["auto-detected"]
+  - src: "/images/pomocka.png"
+    title: "pomocka"
+    alt: "Photo: pomocka.png"
+    description: "Auto-added photo"
+    tags: ["auto-detected"]
