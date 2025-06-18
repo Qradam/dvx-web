@@ -1,60 +1,45 @@
-import { promises as fs } from 'fs'
-import path from 'path'
-
 export default defineEventHandler(async (event) => {
   try {
-    // Get images from YAML content
+    console.log('API called - trying to read content...')
+    
+    // Try different ways to read the content
     let yamlImages = []
     try {
-      const content = await $content('gallery/index').findOne()
+      // Try the exact path
+      const content = await $content('gallery').findOne()  // <-- This line goes here
+      console.log('Content found:', content)
       yamlImages = content.images || []
+      console.log('Images found:', yamlImages)
     } catch (error) {
-      console.log('No YAML content found, that\'s okay')
+      console.log('Error reading content:', error)
+      
+      // Try without /index
+      try {
+        const content2 = await $content('gallery').findOne()
+        console.log('Content found (method 2):', content2)
+        yamlImages = content2.images || []
+      } catch (error2) {
+        console.log('Error reading content (method 2):', error2)
+      }
     }
-
-    // Get all images from public/images folder
-    const imagesDir = path.join(process.cwd(), 'public/images')
-    let folderImages = []
-    
-    try {
-      const files = await fs.readdir(imagesDir)
-      folderImages = files
-        .filter(file => /\.(jpg|jpeg|png|gif|webp)$/i.test(file))
-        .map(file => {
-          // Check if this image is already in YAML with metadata
-          const yamlImage = yamlImages.find(img => img.src === `/images/${file}`)
-          
-          if (yamlImage) {
-            return yamlImage // Use YAML data if available
-          } else {
-            // Auto-generate data for images not in YAML
-            return {
-              src: `/images/${file}`,
-              title: file.replace(/\.[^/.]+$/, "").replace(/[-_]/g, ' '), // Remove extension and replace - _ with spaces
-              alt: `Photo: ${file}`,
-              description: "Uploaded photo",
-              tags: ["uploaded"]
-            }
-          }
-        })
-    } catch (error) {
-      console.log('Could not read images directory:', error)
-    }
-
-    // Combine and deduplicate images
-    const allImages = folderImages
 
     return {
       success: true,
-      data: allImages,
+      data: yamlImages,
       title: "My Photo Gallery",
-      description: "A collection of my favorite photos"
+      description: "A collection of my favorite photos",
+      debug: {
+        foundImages: yamlImages.length,
+        contentPath: 'gallery'
+      }
     }
   } catch (error) {
+    console.log('API Error:', error)
     return {
       success: false,
       data: [],
-      message: "Error loading gallery"
+      message: "Error loading gallery",
+      error: error.message
     }
   }
 })
