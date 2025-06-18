@@ -1,45 +1,90 @@
+import { promises as fs } from 'fs'
+import path from 'path'
+
 export default defineEventHandler(async (event) => {
   try {
-    console.log('API called - trying to read content...')
+    // Get existing YAML content
+    let existingContent = {
+      title: "My Photo Gallery",
+      description: "A collection of my favorite photos",
+      images: []
+    }
     
-    // Try different ways to read the content
-    let yamlImages = []
     try {
-      // Try the exact path
-      const content = await $content('gallery').findOne()  // <-- This line goes here
-      console.log('Content found:', content)
-      yamlImages = content.images || []
-      console.log('Images found:', yamlImages)
+      const content = await queryContent('gallery').findOne()
+      if (content) {
+        existingContent = content
+      }
     } catch (error) {
-      console.log('Error reading content:', error)
-      
-      // Try without /index
+      console.log('No existing YAML found, will create one')
+    }
+
+    // Scan the images directory
+    const imagesDir = path.join(process.cwd(), 'public/images')
+    let actualFiles = []
+    
+    try {
+      const files = await fs.readdir(imagesDir)
+      actualFiles = files.filter(file => /\.(jpg|jpeg|png|gif|webp)$/i.test(file))
+    } catch (error) {
+      console.log('Could not read images directory:', error)
+      actualFiles = []
+    }
+
+    // Create updated images array
+    const updatedImages = actualFiles.map(filename => {
+      // Check if this file already has metadata in YAML
+      const existingImage = existingContent.images?.find(img => 
+        img.src === `/images/${filename}` || img.src.endsWith(filename)
+      )
+
+      if (existingImage) {
+        return existingImage // Keep existing metadata
+      } else {
+        // Generate new metadata for new files
+        return {
+          src: `/images/${filename}`,
+          title: filename.replace(/\.[^/.]+$/, "").replace(/[-_]/g, ' '),
+          alt: `Photo: ${filename}`,
+          description: "Auto-added photo",
+          tags: ["auto-detected"]
+        }
+      }
+    })
+
+    // Update the YAML file if there are changes
+    if (JSON.stringify(updatedImages) !== JSON.stringify(existingContent.images)) {
       try {
-        const content2 = await $content('gallery').findOne()
-        console.log('Content found (method 2):', content2)
-        yamlImages = content2.images || []
-      } catch (error2) {
-        console.log('Error reading content (method 2):', error2)
+        const yamlContent = `title: "${existingContent.title}"
+description: "${existingContent.description}"
+images:${updatedImages.map(img => `
+  - src: "${img.src}"
+    title: "${img.title}"
+    alt: "${img.alt}"
+    description: "${img.description}"
+    tags: [${img.tags.map(tag => `"${tag}"`).join(', ')}]`).join('')}
+`
+        
+        const yamlPath = path.join(process.cwd(), 'content/gallery.yml')
+        await fs.writeFile(yamlPath, yamlContent)
+        console.log('Updated gallery.yml with', updatedImages.length, 'images')
+      } catch (writeError) {
+        console.log('Could not write YAML file:', writeError)
       }
     }
 
     return {
       success: true,
-      data: yamlImages,
-      title: "My Photo Gallery",
-      description: "A collection of my favorite photos",
-      debug: {
-        foundImages: yamlImages.length,
-        contentPath: 'gallery'
-      }
+      data: updatedImages,
+      title: existingContent.title,
+      description: existingContent.description
     }
   } catch (error) {
     console.log('API Error:', error)
     return {
       success: false,
       data: [],
-      message: "Error loading gallery",
-      error: error.message
+      message: "Error loading gallery"
     }
   }
 })
