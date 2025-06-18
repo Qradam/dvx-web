@@ -10,6 +10,7 @@ export default defineNuxtConfig({
     '@nuxt/icon',
     '@nuxt/image',
     '@nuxtjs/tailwindcss'
+    '@nuxt/studio'
   ],
   content: {
     documentDriven: false,
