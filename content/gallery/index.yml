@@ -1,0 +1,13 @@
+title: "My Photo Gallery"
+description: "A collection of my favorite photos"
+images:
+  - src: "/images/dummy.webp"
+    title: "Test Photo 1"
+    alt: "A test photo"
+    description: "Testing with dummy.webp"
+    tags: ["test"]
+  - src: "/images/pomocka.png"
+    title: "Test Photo 2"
+    alt: "Another test photo"
+    description: "Testing with pomocka.png"
+    tags: ["test"]
