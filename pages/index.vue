@@ -19,8 +19,8 @@
           >
             <div class="aspect-square overflow-hidden rounded-lg bg-gray-200">
               <img 
-                :src="image.src" 
-                :alt="image.alt"
+                :src="image.url" 
+                :alt="image.name"
                 class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110"
                 loading="lazy"
               />
@@ -54,8 +54,8 @@
             ✕
           </button>
           <img 
-            :src="selectedImage.src" 
-            :alt="selectedImage.alt"
+            :src="selectedImage.url" 
+            :alt="selectedImage.name"
             class="max-w-full max-h-full object-contain rounded-lg"
           />
           <div class="text-white mt-4 text-center">
@@ -88,10 +88,15 @@
   
   const loadImages = async () => {
     try {
-      const { data } = await $fetch('/api/gallery')
-      galleryImages.value = data || []
+      const response = await $fetch('/api/gallery')
+      if (response.success) {
+        galleryImages.value = response.data || []
+      } else {
+        console.error('Failed to load images:', response.error)
+        galleryImages.value = []
+      }
     } catch (error) {
-      console.log('No images found yet')
+      console.error('Error loading images:', error)
       galleryImages.value = []
     }
   }
