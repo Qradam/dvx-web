@@ -57,3 +57,6 @@ jspm_packages/
 
 # Vim swap files
 *.swp
+
+# Nuxt Content
+.data/
