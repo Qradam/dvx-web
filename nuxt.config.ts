@@ -1,8 +1,6 @@
-// https://nuxt.com/docs/api/configuration/nuxt-config
 export default defineNuxtConfig({
   compatibilityDate: '2024-04-03',
   devtools: { enabled: true },
-
   modules: [
     '@nuxt/content',
     '@nuxt/eslint',
@@ -12,9 +10,10 @@ export default defineNuxtConfig({
     '@nuxtjs/tailwindcss'
   ],
   content: {
-    experimental: {
-      nativeSqlite: true
-    }
+    // Remove experimental.nativeSqlite if Node.js version < 22.5.0
+    // experimental: {
+    //   nativeSqlite: true
+    // }
   },
   runtimeConfig: {
     public: {
