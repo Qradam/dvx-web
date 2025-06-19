@@ -9,12 +9,7 @@ export default defineNuxtConfig({
     '@nuxt/image',
     '@nuxtjs/tailwindcss'
   ],
-  content: {
-    // Remove experimental.nativeSqlite if Node.js version < 22.5.0
-    // experimental: {
-    //   nativeSqlite: true
-    // }
-  },
+  content: {},
   runtimeConfig: {
     public: {
       contentPreviewApi: process.env.NUXT_CONTENT_PREVIEW_API
